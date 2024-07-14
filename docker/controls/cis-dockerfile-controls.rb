@@ -6,7 +6,7 @@ control 'cis-dockerfile-4.1' do
     title 'Ensure that the Dockerfile does not use the root user'
     desc 'Do not use the root user in Dockerfile as it can pose security risks.'
   
-    describe file('docker_path') do
+    describe file(input('docker_path')) do
       it { should exist }
       its('content') { should_not match(/^USER root$/) }
     end
