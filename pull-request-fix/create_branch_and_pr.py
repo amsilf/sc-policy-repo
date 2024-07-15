@@ -22,7 +22,7 @@ newbranch = 'fix-branch-' + id_generator()
 
 username = 'amsilf'
 repo_name = 'sc-helm-app'
-git_token = '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'
+git_token = sys.argv[3]
 
 violation_reason = "{\"result\":[{\"expressions\":[{\"value\":{\"play\":{\"deny\":[\"The number of replicas should be larger than2.Thecurrentnumberis1\"],\"number_of_replicas\":2}},\"text\":\"data\",\"location\":{\"row\":1,\"col\":1}}]}]}"
 technology = "helm"
