@@ -17,12 +17,13 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 # Variables
 OPEN_AI_KEY = sys.argv[1]
 
-repo = 'https://github.com/amsilf/sc-helm-app.git'
 newbranch = 'fix-branch-' + id_generator()
 
 username = 'amsilf'
 repo_name = 'sc-helm-app'
 git_token = sys.argv[2]
+
+repo = f'https://amsilf:{git_token}@github.com/amsilf/sc-helm-app.git'
 
 violation_reason = "{\"result\":[{\"expressions\":[{\"value\":{\"play\":{\"deny\":[\"The number of replicas should be larger than2.Thecurrentnumberis1\"],\"number_of_replicas\":2}},\"text\":\"data\",\"location\":{\"row\":1,\"col\":1}}]}]}"
 technology = "helm"
@@ -109,7 +110,7 @@ def create_pr(username, repo_name, newbranch, git_token):
     if not r.ok:
         print("Request Failed: {0}".format(r.text))
 
-def fix_misconfigurations(repo_path, newbranch, violation_path, violation_reason, technology, username, repo_name, git_token, local_repo="./test"):
+def fix_misconfigurations(repo_path, newbranch, violation_path, violation_reason, technology, username, repo_name, git_token, local_repo="./tmp"):
     repo = checkout_and_create_branch(repo_path, newbranch, local_repo)
     fix_violation(local_repo + "/" + violation_path, violation_reason, technology)
     push_changes(repo)
