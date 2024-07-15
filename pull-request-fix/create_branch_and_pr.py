@@ -25,20 +25,20 @@ git_token = sys.argv[2]
 
 repo = f'https://amsilf:{git_token}@github.com/amsilf/sc-helm-app.git'
 
-violation_reason = "{\"result\":[{\"expressions\":[{\"value\":{\"play\":{\"deny\":[\"The number of replicas should be larger than2.Thecurrentnumberis1\"],\"number_of_replicas\":2}},\"text\":\"data\",\"location\":{\"row\":1,\"col\":1}}]}]}"
+violation_reason = "{\"result\":[{\"expressions\":[{\"value\":{\"play\":{\"deny\":[\"The number of replicas should be larger than 2.Thecurrentnumberis1\"],\"number_of_replicas\":2}},\"text\":\"data\",\"location\":{\"row\":1,\"col\":1}}]}]}"
 technology = "helm"
 
 template = """  
     Fix the original code based on the violation output.
 
     The violation output is {reason}
-    The targetr language is {tech}
+    The target language is {tech}
     The original code is {source_code}
 
-    Start the solution with a brief comment about the request.
     DO NOT output file extension at the beginning of the output.
-    Output only the solution without any extra words. Output only a valud yaml, HCL, or Docker depends on a selected {tech}.
-"""
+    The output MUST start with a comment about the undertaken approach to solve the violation.
+    Output only the solution without extra words. Output only a valid yaml, HCL, or Docker depending on a selected {tech}.
+ """
 
 def propose_the_fix_solution(violation_reason, technology, code):
     try:
@@ -48,7 +48,7 @@ def propose_the_fix_solution(violation_reason, technology, code):
 
         chain = prompt | llm | output_parser
         response = chain.invoke({ "reason": violation_reason, "tech": technology, "source_code": code })
-        return response.replace('`', '')
+        return response.replace('`', '').replace('yaml', '#yaml')
     except Exception as e:
         print(f"An error occurred: {e}")       
 
