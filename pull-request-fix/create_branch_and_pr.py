@@ -36,7 +36,7 @@ template = """
     The original code is {source_code}
 
     Start the solution with a brief comment about the request.
-    Do not output file extension at the beginning of the solution.
+    DO NOT output file extension at the beginning of the output.
     Output only the solution without any extra words. Output only a valud yaml, HCL, or Docker depends on a selected {tech}.
 """
 
