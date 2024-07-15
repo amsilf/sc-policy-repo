@@ -15,14 +15,14 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
 # Variables
-OPEN_AI_KEY = sys.argv[2]
+OPEN_AI_KEY = sys.argv[1]
 
 repo = 'https://github.com/amsilf/sc-helm-app.git'
 newbranch = 'fix-branch-' + id_generator()
 
 username = 'amsilf'
 repo_name = 'sc-helm-app'
-git_token = sys.argv[3]
+git_token = sys.argv[2]
 
 violation_reason = "{\"result\":[{\"expressions\":[{\"value\":{\"play\":{\"deny\":[\"The number of replicas should be larger than2.Thecurrentnumberis1\"],\"number_of_replicas\":2}},\"text\":\"data\",\"location\":{\"row\":1,\"col\":1}}]}]}"
 technology = "helm"
