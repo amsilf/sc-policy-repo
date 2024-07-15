@@ -35,7 +35,9 @@ template = """
     The targetr language is {tech}
     The original code is {source_code}
 
-    Output only the solution without any extra words. Output only a valud yaml, HCL, or Docker depends on {tech}.
+    Start the solution with a brief comment about the request.
+    Do not output file extension at the beginning of the solution.
+    Output only the solution without any extra words. Output only a valud yaml, HCL, or Docker depends on a selected {tech}.
 """
 
 def propose_the_fix_solution(violation_reason, technology, code):
