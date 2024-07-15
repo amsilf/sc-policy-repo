@@ -5,14 +5,57 @@ import string
 import random
 import requests
 import json
+import sys
+
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_openai import ChatOpenAI
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
-def fix_violation(violation_path, violation_reason):
-    f_with_violation = open(violation_path, "a")
-    # FIXME: ask ChatGPT about the fix
-    f_with_violation.write(id_generator())
+# Variables
+OPEN_AI_KEY = sys.argv[2]
+
+repo = 'https://github.com/amsilf/sc-helm-app.git'
+newbranch = 'fix-branch-' + id_generator()
+
+username = 'amsilf'
+repo_name = 'sc-helm-app'
+git_token = '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'
+
+violation_reason = "{\"result\":[{\"expressions\":[{\"value\":{\"play\":{\"deny\":[\"The number of replicas should be larger than2.Thecurrentnumberis1\"],\"number_of_replicas\":2}},\"text\":\"data\",\"location\":{\"row\":1,\"col\":1}}]}]}"
+technology = "helm"
+
+template = """  
+    Fix the original code based on the violation output.
+
+    The violation output is {reason}
+    The targetr language is {tech}
+    The original code is {source_code}
+
+    Output only the solution without any extra words. Output only a valud yaml, HCL, or Docker depends on {tech}.
+"""
+
+def propose_the_fix_solution(violation_reason, technology, code):
+    try:
+        prompt = PromptTemplate.from_template(template)
+        llm = ChatOpenAI(openai_api_key=OPEN_AI_KEY, model = "gpt-4o")
+        output_parser = StrOutputParser()
+
+        chain = prompt | llm | output_parser
+        response = chain.invoke({ "reason": violation_reason, "tech": technology, "source_code": code })
+        return response.replace('`', '')
+    except Exception as e:
+        print(f"An error occurred: {e}")       
+
+def fix_violation(violation_path, violation_reason, technology):
+    code = ""
+    with open(violation_path) as f: code = f.read()
+    solution = propose_the_fix_solution(violation_reason, technology, code)
+
+    f_with_violation = open(violation_path, "w")
+    f_with_violation.write(solution)
     f_with_violation.close()
 
     return
@@ -52,7 +95,7 @@ def create_pr(username, repo_name, newbranch, git_token):
     }
 
     payload = {
-        "title": 'Compliance violation fix',
+        "title": 'Compliance violation fix - ' + id_generator(),
         "body": 'An attempt to fix a compliance violation',
         "head": newbranch,
         "base": 'main',
@@ -66,23 +109,10 @@ def create_pr(username, repo_name, newbranch, git_token):
     if not r.ok:
         print("Request Failed: {0}".format(r.text))
 
-def fix_misconfigurations(repo_path, newbranch, violation_path, violation_reason, username, repo_name, git_token, local_repo="./test"):
+def fix_misconfigurations(repo_path, newbranch, violation_path, violation_reason, technology, username, repo_name, git_token, local_repo="./test"):
     repo = checkout_and_create_branch(repo_path, newbranch, local_repo)
-    fix_violation(local_repo + "/" + violation_path, violation_reason)
+    fix_violation(local_repo + "/" + violation_path, violation_reason, technology)
     push_changes(repo)
     create_pr(username, repo_name, newbranch, git_token)
-
-def main():
-    repo = ''
-    newbranch = ''
-
-    username = ''
-    repo_name = ''
-    git_token = ''
-
-    fix_misconfigurations(repo, newbranch, "", "", username, repo_name, git_token)
-
-    return
-
-if __name__=="__main__": 
-    main() 
+    
+fix_misconfigurations(repo, newbranch, "sc-helm-chart/values.yaml", violation_reason, technology, username, repo_name, git_token)
